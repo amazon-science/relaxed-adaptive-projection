@@ -1,0 +1,39 @@
+# We pull the CUDA Runtime base image (that has header files included)
+FROM nvidia/cuda:11.3.1-cudnn8-runtime-ubuntu20.04
+
+# Redefine the arg so that it can be used by later statements
+ARG CUDA=11.3.1
+
+# Environment variable is available to the container at runtime
+ENV CUDA ${CUDA}
+
+WORKDIR /usr/src
+
+COPY requirements.txt .
+
+RUN apt-get update && \
+    apt-get install -y software-properties-common && \
+    # Add the repository to fetch the python3.8-dev
+    add-apt-repository ppa:deadsnakes/ppa && \
+    # Update our repository index
+    apt-get update && \
+    # Install python3.8, wget and the archive keyring
+    apt-get install -y python3.8 && \
+    # Install the others
+    apt-get install -y python3-pip git&& \
+    apt-get upgrade -y && \
+    rm -rf /var/lib/apt/lists/* && \
+    # Fix the symlinks
+    ln -sf /usr/bin/python3.8 /usr/local/bin/python3 && \
+    ln -sf /usr/bin/python3.8 /usr/bin/python3 && \
+    ln -sf /usr/bin/python3.8 /usr/bin/python && \
+    # Force reinstall to avoid warning "pip is being invoked by an old script wrapper"
+    python -m pip install --no-cache --upgrade --force-reinstall pip && \
+    ln -sf /usr/local/bin/pip /usr/bin/pip && \
+    ln -sf /usr/local/bin/pip3 /usr/bin/pip3 && \
+    # Ignore the CPU version of jax
+    grep -v "jax" requirements.txt | xargs pip install && \
+    # cuda111 is the option for any CUDA version 11.1+
+    pip install --upgrade jax[cuda111] -f https://storage.googleapis.com/jax-releases/jax_releases.html
+
+CMD python

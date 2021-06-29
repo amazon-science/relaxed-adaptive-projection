@@ -1,0 +1,2 @@
+class PrivacyBudgetExhaustedError(BaseException):
+    pass
