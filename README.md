@@ -151,7 +151,7 @@ See CONTRIBUTING for more information.
 
 ## License
 
-This library is licensed under the MIT-0 License. See the LICENSE file.
+This library is licensed under the [CC BY-NC 4.0](https://creativecommons.org/licenses/by-nc/4.0/) License. See the [LICENSE](LICENSE) file.
 
 ## Citation
 Please use the following citation when publishing material that uses our code:
