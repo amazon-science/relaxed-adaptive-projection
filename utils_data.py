@@ -1,3 +1,5 @@
+# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: CC-BY-NC-4.0
 import jax.numpy as np
 from jax import random, jit, nn, vmap, partial
 import numpy as onp
