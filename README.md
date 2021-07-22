@@ -156,12 +156,19 @@ This library is licensed under the [CC BY-NC 4.0](https://creativecommons.org/li
 ## Citation
 Please use the following citation when publishing material that uses our code:
 ```tex
-@misc{aydore2021differentially,
-      title={Differentially Private Query Release Through Adaptive Projection}, 
-      author={Sergul Aydore and William Brown and Michael Kearns and Krishnaram Kenthapadi and Luca Melis and Aaron Roth and Ankit Siva},
-      year={2021},
-      eprint={2103.06641},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG}
+@InProceedings{pmlr-v139-aydore21a,
+  title = 	 {Differentially Private Query Release Through Adaptive Projection},
+  author =       {Aydore, Sergul and Brown, William and Kearns, Michael and Kenthapadi, Krishnaram and Melis, Luca and Roth, Aaron and Siva, Ankit A},
+  booktitle = 	 {Proceedings of the 38th International Conference on Machine Learning},
+  pages = 	 {457--467},
+  year = 	 {2021},
+  editor = 	 {Meila, Marina and Zhang, Tong},
+  volume = 	 {139},
+  series = 	 {Proceedings of Machine Learning Research},
+  month = 	 {18--24 Jul},
+  publisher =    {PMLR},
+  pdf = 	 {http://proceedings.mlr.press/v139/aydore21a/aydore21a.pdf},
+  url = 	 {http://proceedings.mlr.press/v139/aydore21a.html},
+  abstract = 	 {We propose, implement, and evaluate a new algo-rithm for releasing answers to very large numbersof statistical queries likek-way marginals, sub-ject to differential privacy. Our algorithm makesadaptive use of a continuous relaxation of thePro-jection Mechanism, which answers queries on theprivate dataset using simple perturbation, and thenattempts to find the synthetic dataset that mostclosely matches the noisy answers. We use a con-tinuous relaxation of the synthetic dataset domainwhich makes the projection loss differentiable,and allows us to use efficient ML optimizationtechniques and tooling. Rather than answering allqueries up front, we make judicious use of ourprivacy budget by iteratively finding queries forwhich our (relaxed) synthetic data has high error,and then repeating the projection. Randomizedrounding allows us to obtain synthetic data in theoriginal schema. We perform experimental evalu-ations across a range of parameters and datasets,and find that our method outperforms existingalgorithms on large query classes.}
 }
 ```
