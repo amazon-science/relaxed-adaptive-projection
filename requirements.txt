@@ -14,6 +14,6 @@ pyparsing==2.4.7
 python-dateutil==2.8.1
 pytz==2020.4
 scipy==1.5.4
-setuptools==49.2.1
+setuptools==65.5.1
 six==1.15.0
 tqdm==4.54.1
