@@ -9,13 +9,12 @@ matplotlib==3.3.3
 numpy==1.19.4
 opt-einsum==3.3.0
 pandas==1.1.5
-Pillow==8.0.1
+Pillow==10.3.0
 pyparsing==2.4.7
 python-dateutil==2.8.1
 pytz==2020.4
-scikit-learn==0.24.2
-scipy==1.5.4
-setuptools==49.2.1
+scipy==1.10.0
+setuptools==65.5.1
 six==1.15.0
 tqdm==4.54.1
 seaborn==0.11.2
