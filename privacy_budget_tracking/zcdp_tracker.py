@@ -1,9 +1,9 @@
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: CC-BY-NC-4.0
 import math
 
-import numpy as onp
-from jax import random, vmap, jit, numpy as np
+import numpy as np
+from jax import jit
+from jax import random
+from jax import vmap
 
 from .privacy_budget_exhausted_error import PrivacyBudgetExhaustedError
 
@@ -75,7 +75,7 @@ class zCDPTracker:
         :param epsilon:
         :return: rho
         """
-        rho = (epsilon ** 2) / 2
+        rho = (epsilon**2) / 2
         return rho
 
     @staticmethod
@@ -88,8 +88,7 @@ class zCDPTracker:
         :return: epsilon
         """
         epsilon = rho + 2 * math.sqrt(rho * math.log(1 / delta))
-        epsilon2 = rho + 2 * \
-            math.sqrt(rho * math.log(math.sqrt(math.pi * rho) / delta))
+        epsilon2 = rho + 2 * math.sqrt(rho * math.log(math.sqrt(math.pi * rho) / delta))
         return min(epsilon, epsilon2)
 
     def get_gaussian_sd_for_budget(self, rho: float) -> float:
@@ -98,8 +97,13 @@ class zCDPTracker:
         Refer to Proposition 1.6 in https://arxiv.org/pdf/1605.02065.pdf
         :param rho:
         :return: sigma, standard deviation for gaussian noise
+
+        # scale for answering single query.
+        sensitivity = 1/n
+        for q queries
+        sensitivity = sqrt{q}/n
         """
-        sigma = math.sqrt((self.sensitivity ** 2) / (2 * rho))
+        sigma = math.sqrt((self.sensitivity**2) / (2 * rho))
         return sigma
 
     def get_laplace_b_for_budget(self, rho: float) -> float:
@@ -146,44 +150,34 @@ class zCDPTracker:
         """
         self.budget_used += rho * calls
 
-    @staticmethod
-    def __filter_answered_queries(
-        sorted_indices: np.DeviceArray, answered_queries: np.DeviceArray
-    ):
-        return sorted_indices[
-            np.in1d(sorted_indices, answered_queries,
-                    assume_unique=True, invert=True)
-        ]
+    def get_gumbel_scale(self, rho: float, q: int) -> float:
+        """
+        Given the total budget to spend and the number of indices to return,
+        return the scale/beta parameter for the gumbel distribution.
 
-    def report_noisy_max(
-        self,
-        query_errors: np.DeviceArray,
-        answered_queries: np.DeviceArray,
-        budget: float,
-    ) -> np.DeviceArray:
+        The scale is determined by a few published results.
+        1. The iterative (or peeling) exponential mechanism is epsilon-bounded
+        range and hence 2*epsilon-DP (Lemma 4.1 of https://arxiv.org/pdf/1905.04273.pdf)
+        2. The iterative exponential mechanism is equivalent to the iterative
+        Gumbel mechanism (Lemma 4.2 of https://arxiv.org/pdf/1905.04273.pdf)
+        3. The iterative Gumbel mechanism (repeated k-times) is equivalent to
+        the one-shot Gumbel mechanism (Corollary 4.1 of https://arxiv.org/pdf/1905.04273.pdf)
+        4. Thus, the one-shot Gumbel mechanism is 2*epsilon-DP, inverting this
+        to find the scale we find that scale = sqrt(k)/(n * sqrt(2 * rho))
+        :param rho: zCDP budget
+        :param q: number of queries to select
+        :return: beta, parameter for generating Gumbel noise
         """
-        Given the errors of a set of queries, find the worst query that have not been answered yet
-        :param query_errors: Errors corresponding to each query
-        :param answered_queries: Already answered queries
-        :param budget: The privacy budget we can spend on this
-        :return: the privately chosen q worst queries we haven't answered yet
-        """
-        # The scale/beta parameter for Gumbel noise is same as laplace scale
-        gumbel_beta = self.get_laplace_b_for_budget(budget)
-        self.__charge_report_noisy_max(budget)
-        query_errors_noisy = query_errors + onp.random.gumbel(
-            loc=0, scale=gumbel_beta, size=len(query_errors)
-        )
-        top_indices = np.flip(np.argsort(query_errors_noisy))
-        return zCDPTracker.__filter_answered_queries(top_indices, answered_queries)[0]
+
+        return self.sensitivity * math.sqrt(q / (2 * rho))
 
     def select_noisy_q(
         self,
-        query_errs: np.DeviceArray,
-        answered_queries: np.DeviceArray,
+        query_errs: np.array,
+        answered_queries: np.array,
         q: int,
         query_select_budget: float,
-    ) -> np.DeviceArray:
+    ) -> np.array:
         """
         Given the errors of a set of queries, find the q noisiest queries that have not been answered yet
         :param query_errs: Errors corresponding to each query
@@ -192,17 +186,16 @@ class zCDPTracker:
         :param query_select_budget: The privacy budget we can spend on this
         :return: the privately chosen q worst queries we haven't answered yet
         """
-        q_worst_queries = np.array([])
-        per_query_budget = query_select_budget / q
-        for i in range(q):
-            answered_queries = np.append(answered_queries, q_worst_queries)
-            q_worst_queries = np.append(
-                q_worst_queries,
-                self.report_noisy_max(
-                    query_errs, answered_queries, per_query_budget),
-            )
 
-        return np.asarray(q_worst_queries, dtype=np.int32)
+        gumbel_scale = self.get_gumbel_scale(query_select_budget, q)
+
+        self.__charge_report_noisy_max(query_select_budget)
+        noisy_query_errors = query_errs + np.random.gumbel(
+            loc=0, scale=gumbel_scale, size=query_errs.size
+        )
+
+        noisy_query_errors[answered_queries.astype(int)] = -np.inf
+        return np.argpartition(noisy_query_errors, -q)[-q:]
 
     @staticmethod
     def __compute_rho(
@@ -255,8 +248,7 @@ class zCDPTracker:
             )
             / self.epochs
         )
-        rho_1 = zCDPTracker.__compute_rho(
-            epsilon=epsilon, delta=delta) / self.epochs
+        rho_1 = zCDPTracker.__compute_rho(epsilon=epsilon, delta=delta) / self.epochs
         return rho_0 if rho_0 > 0 else rho_1
 
     def gaussian_mechanism(self, key, statistic_fn, dataset, query_answer_budget):
@@ -266,8 +258,16 @@ class zCDPTracker:
             query_answer_budget, calls=computed_statistic.shape[0]
         )
 
-        rand_noise = zCDPTracker.generate_random_noise(
-            key, computed_statistic.shape)
+        rand_noise = zCDPTracker.generate_random_noise(key, computed_statistic.shape)
+        return computed_statistic + (gaussian_sd * rand_noise)
+
+    def gaussian_mechanism_v2(self, key, computed_statistic, query_answer_budget):
+        gaussian_sd = self.get_gaussian_sd_for_budget(query_answer_budget)
+        self.__charge_gaussian_mech(
+            query_answer_budget, calls=computed_statistic.shape[0]
+        )
+
+        rand_noise = zCDPTracker.generate_random_noise(key, computed_statistic.shape)
         return computed_statistic + (gaussian_sd * rand_noise)
 
     @staticmethod

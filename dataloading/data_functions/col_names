@@ -1,0 +1,43 @@
+--------- Categorical Columns ---------
+COW,,                       # Class of worker
+SCHL,CATEGORICAL,           # Educational attainment
+MAR,CATEGORICAL,            # Marital status
+OCCP,CATEGORICAL,           # Occupation recode for 2018 and later based on 2018 OCC codes
+RELP,CATEGORICAL,
+SEX,CATEGORICAL,
+RAC1P,CATEGORICAL,          # Recoded detailed race code
+WAOB,CATEGORICAL,           # World area of birth
+FOCCP,CATEGORICAL,          # Occupation allocation flag (binary)
+DIS,CATEGORICAL,            # Disability recode (binary)
+ST,CATEGORICAL,             # State code based on 2010 Census definition
+CIT,CATEGORICAL,            # Citizenship status
+JWTR,CATEGORICAL,           # Means of transportation to work
+MIL, CATEGORICAL,           # Served September 2001 or later
+ANC': CATEGORICAL,          # Ancestry recode
+NATIVITY': CATEGORICAL,     # Nativity
+DEAR': CATEGORICAL,         # Hearing difficulty
+DEYE': CATEGORICAL,         # Vision difficulty
+DREM': CATEGORICAL,         #  Cognitive difficulty
+GCL': CATEGORICAL,          # Grandparents living with grandchildren
+FER': CATEGORICAL,          # Gave birth to child within the past 12 months b .N/A (less than 15 years/greater than 50 years/male) 1 .Yes 2 .No
+
+--------- Numeric Columns ------------
+WKHP': NUMERIC,             # Usual hours worked per week past 12 months
+PINCP': NUMERIC,            # Total person's income
+AGEP': NUMERIC,
+PWGTP': NUMERIC,            # Person weight
+INTP': NUMERIC,             # Interest, dividends, and net rental income past 12 months (signed, use ADJINC to adjust to constant dollars
+JWRIP': NUMERIC,            # Vehicle occupancy
+PAP': NUMERIC,              # Public assistance income past 12 months (use ADJINC to adjust to constant dollars)
+SEMP': NUMERIC,             # Self-employment income past 12 months (signed, use ADJINC to adjust SEMP to constant dollars)
+WAGP': NUMERIC,             # Wages or salary income past 12 months (use ADJINC to adjust WAGP to constant dollars)
+POVPIP': NUMERIC,           # Income-to-poverty ratio recode
+
+
+
+-------- LABELS --------------
+'JWMNP': NUMERIC,           # Travel time to work
+'ESP'   : CATEGORICAL,      # Employment status of parents
+'MIG'   : CATEGORICAL,      # Mobility status (lived here 1 year ago)
+'ESR': CATEGORICAL,         # Employment status recode
+'PUBCOV': CATEGORICAL       # Public health coverage recode
