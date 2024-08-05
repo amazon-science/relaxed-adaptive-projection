@@ -14,8 +14,8 @@ pyparsing==2.4.7
 python-dateutil==2.8.1
 pytz==2020.4
 scipy==1.10.0
-setuptools==65.5.1
+setuptools==70.0.0
 six==1.15.0
-tqdm==4.54.1
-seaborn==0.11.2
+tqdm==4.66.3
 folktables
+seaborn==0.11.2
